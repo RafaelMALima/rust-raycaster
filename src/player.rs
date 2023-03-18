@@ -1,11 +1,11 @@
 use sdl2::{rect::Rect, EventPump, keyboard::Scancode};
 
 pub struct Player{
-    x:f64,
-    y:f64,
-    dx:f64,
-    dy:f64,
-    alpha:f64,
+    pub x:f64,
+    pub y:f64,
+    pub dx:f64,
+    pub dy:f64,
+    pub alpha:f64,
 }
 impl Player{
     pub fn new()-> Self{

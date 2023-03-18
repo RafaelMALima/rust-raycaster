@@ -1,11 +1,11 @@
-use sdl2::{rect::Rect, render::Canvas};
-use player::Player;
+use sdl2::{rect::Rect, render::Canvas, video::Window, pixels::Color};
+use crate::Player;
 pub struct Level{
-    map_grid:[[u8;8];8],
-    width:i32,
-    heigth:i32,
-    id: u8,
-    name:String,
+    pub map_grid:[[u8;8];8],
+    pub width:i32,
+    pub heigth:i32,
+    pub id: u8,
+    pub name:String,
 }
 impl Level{
     pub fn new(grid:[[u8;8];8], cell_width:i32 , cell_heigth:i32 , levl_id:u8, levl_name:String)-> Self{
@@ -17,17 +17,22 @@ impl Level{
             heigth:cell_heigth,
         }
     }
-    pub fn draw_map(&self, map_rect:sdl2::render::Canvas<T>, optional_Player:Option<Player>){ //player must be wrapped inside Option enum eg.(Some(Player))
+    pub fn draw_map(&self,map_rect:&mut sdl2::render::Canvas<Window>, optional_Player:Option<&Player>){ //player must be wrapped inside Option enum eg.(Some(Player))
         let draw_color = sdl2::pixels::Color::RGB(10,10,10);
-        for i in 0..7{
-            for j in 0..7{
+        for i in 0..8{
+            for j in 0..8{
                 if self.map_grid[i][j] == 1{
-                    let my_rect:Rect;
-                    my_rect.w = self.width;
-                    my_rect.h = self.heigth;
-                    my_rect.x = my_rect.w*(i as i32);
-                    my_rect.y = my_rect.h*(j as i32);
-                    map_rect.draw_rect(my_rect);
+                    let my_rect = Rect::new(
+                        self.width*(i as i32),
+                        self.heigth*(j as i32),
+                        self.width as u32,
+                        self.heigth as u32,
+                    );
+                    let mut clear_color = sdl2::pixels::Color::RGB(10,10,10);
+                    map_rect.set_draw_color(clear_color);
+                    let result = map_rect.fill_rect(my_rect);
+                    clear_color = sdl2::pixels::Color::RGB(100,100,100);
+                    map_rect.set_draw_color(clear_color);
                 }
             }
         }
