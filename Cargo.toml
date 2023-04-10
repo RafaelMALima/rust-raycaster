@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 #beryllium = "0.12.2"
 sdl2 = "0.35.2"
+vector2d = "2.2.0"

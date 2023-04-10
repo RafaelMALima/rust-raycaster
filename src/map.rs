@@ -1,44 +1,81 @@
-use sdl2::{rect::Rect, render::Canvas, video::Window, pixels::Color};
+use sdl2::{rect::Rect, video::Window};
+use vector2d::Vector2D;
 use crate::Player;
+use std::fs;
+use std::f64::consts::PI;
+
+
+struct Sector{
+    number:u8,
+    points_vec:Vec<Vector2D<f64>>,
+    floor_heigth:u16,
+    ceiling_heigth:u16
+}
 pub struct Level{
-    pub map_grid:[[u8;8];8],
-    pub width:i32,
-    pub heigth:i32,
+    sectors:Vec<Sector>,
     pub id: u8,
     pub name:String,
 }
+
 impl Level{
-    pub fn new(grid:[[u8;8];8], cell_width:i32 , cell_heigth:i32 , levl_id:u8, levl_name:String)-> Self{
-        Level{
-            map_grid:grid,
+    fn load_sectors(&mut self, map_path:String) -> Result<u8,String>{
+        //let contents = fs::read_to_string(map_path);
+        //for row in contents{
+            //if row == "[SECTORS]"
+            //começa a logica para setores
+        //}
+        //cria um setor dummy pra testar
+        let setor = Sector{
+            number:1,
+            points_vec:vec!(
+                Vector2D::new(1.,0.),
+                Vector2D::new(2.,1.),
+                Vector2D::new(1.,2.),
+                Vector2D::new(0.,1.),
+            ),
+            floor_heigth:300,
+            ceiling_heigth:0,
+        };
+        let sec_id = setor.number;
+        self.sectors.push(setor);
+        return Ok(sec_id);
+    }   
+    pub fn new(map_path:String, levl_id:u8, levl_name:String)-> Self{
+        let mut lvl = Level{
+            sectors:Vec::new(),
             id:levl_id,
             name:levl_name,
-            width:cell_width,
-            heigth:cell_heigth,
+        };
+        match lvl.load_sectors(map_path) {
+            Ok(sector) => { println!("Sector {} loaded sucesfully",sector) },
+            Err(error) => { println!("Failed to load sector, exited with error: {}",error) }
         }
+        return lvl;
     }
-    pub fn draw_map(&self,map_rect:&mut sdl2::render::Canvas<Window>, optional_Player:Option<&Player>){ //player must be wrapped inside Option enum eg.(Some(Player))
-        let draw_color = sdl2::pixels::Color::RGB(10,10,10);
-        for i in 0..8{
-            for j in 0..8{
-                if self.map_grid[i][j] == 1{
-                    let my_rect = Rect::new(
-                        self.width*(i as i32),
-                        self.heigth*(j as i32),
-                        self.width as u32,
-                        self.heigth as u32,
-                    );
-                    let mut clear_color = sdl2::pixels::Color::RGB(10,10,10);
-                    map_rect.set_draw_color(clear_color);
-                    let result = map_rect.fill_rect(my_rect);
-                    clear_color = sdl2::pixels::Color::RGB(100,100,100);
-                    map_rect.set_draw_color(clear_color);
+        pub fn draw_map(&self,screen:&mut sdl2::render::Canvas<Window>,player:&Player) -> Result<(), u8>{ 
+        let wall_color = sdl2::pixels::Color::RGB(255,255,255);
+        screen.set_draw_color(wall_color);
+        println!("{}",self.sectors.get(0).unwrap().points_vec.len());
+        for i in 1..self.sectors.get(0).unwrap().points_vec.len(){
+            for line in 0..player.fov{
+                let angle = (player.alpha - PI/8.) + (PI/(4.*player.fov as f64))*line as f64;
+                let point:Vector2D<f64> = player.pos + Vector2D { x: f64::cos(angle), y: f64::sin(angle) };
+                let line_seg_start: &Vector2D<f64> =  self.sectors.get(0).unwrap().points_vec.get(i-1).unwrap();
+                let line_seg_end: &Vector2D<f64> = self.sectors.get(0).unwrap().points_vec.get(i).unwrap();
+                let distance:Option<f64> = player.calculate_distance(point, line_seg_start, line_seg_end);
+                match distance{
+                    Some(dist) => {
+                        match screen.fill_rect(Rect::new(line as i32,720/2 -(300./((dist+0.1))) as i32/2,1,(300./(dist+0.1)) as u32)){
+                            Ok(()) => { }
+                            Err(str) => {println!("{}",str)}
+                        }
+                        
+                    }
+                    _ => { /*do something*/}
                 }
             }
         }
-        match optional_Player{
-            Some(Player) => { }
-            _ => {  }
-        }
+        screen.set_draw_color(sdl2::pixels::Color::RGB(100,100,100));
+        Ok(())
     }
 }

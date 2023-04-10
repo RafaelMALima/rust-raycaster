@@ -1,14 +1,11 @@
-use sdl2::{video::{self, Window}, render::Canvas, rect::Rect, event::Event, EventPump};
+use sdl2::{video::Window, render::Canvas, rect::Rect, EventPump};
 mod event_handler; /*namespace declaration */ use event_handler::event_handler;
 mod player; use player::Player;
 mod map; use map::Level;
 
-static SCREEN_WIDTH:u32 = 800;
-static SCREEN_HEIGHT:u32 = 600;
+static SCREEN_WIDTH:u32 = 1280;
+static SCREEN_HEIGHT:u32 = 720;
 
-fn distance(x1:f64,y1:f64,x2:f64,y2:f64)-> f64{
-    return f64::sqrt((x2 - x1)*(x2 - x1) +(y2 - y1)*(y2 - y1));
-}
 
 fn main() -> Result<(), String>{
     let context = sdl2::init()?;
@@ -18,23 +15,14 @@ fn main() -> Result<(), String>{
     .unwrap();
 
 
-    let level_1 = Level::new([
-        [1,1,1,1,1,1,1,1],
-        [1,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,1],
-        [1,1,1,1,1,1,1,1],],
-        (SCREEN_WIDTH/8) as i32,(SCREEN_HEIGHT/8) as i32,1,"Lvl1".to_string());
+    let level_1 = Level::new("../maps/test.map".to_string(), 0, "Test".to_string());
     
-    let player = Player::new();
+    let mut player = Player::new(vector2d::Vector2D { x: 0.5, y: 0.5 });
 
     let mut canvas:Canvas<Window> = window.into_canvas()
         .build()
         .unwrap();
-    let screen_area = Rect::new(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
+    let _screen_area = Rect::new(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
     let clear_color = sdl2::pixels::Color::RGB(100,100,100);
     canvas.set_draw_color(clear_color);
 
@@ -43,15 +31,20 @@ fn main() -> Result<(), String>{
         .unwrap();
 
     //let keyboard_state_array = sdl2::keyboard::KeyboardStatmape::new(&event_queue);
-    let player1 = Player::new();
     while running {
         let screen_area = Rect::new(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
-        let clear_color = sdl2::pixels::Color::RGB(100,100,100);
+        let _clear_color = sdl2::pixels::Color::RGB(100,100,100);
         running = event_handler(&mut event_queue);
-        canvas.fill_rect(screen_area);
+        match canvas.fill_rect(screen_area){
+            Ok(()) => {{}}
+            Err(err_str) => println!("{}",err_str)
+        }
         
-        player1.player_controller(&event_queue);
-        level_1.draw_map(&mut canvas, Some(&player));
+        player.player_controller(&event_queue);
+        match level_1.draw_map(&mut canvas, &player){
+            Ok(()) => {  }
+            Err(_err_str) => {  }
+        }
         canvas.present();
     }
     Ok(())
