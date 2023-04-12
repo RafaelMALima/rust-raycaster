@@ -6,10 +6,11 @@ use std::f64::consts::PI;
 
 
 struct Sector{
-    number:u8,
+    number:u16,
     points_vec:Vec<Vector2D<f64>>,
     floor_heigth:u16,
-    ceiling_heigth:u16
+    ceiling_heigth:u16,
+    portals:[u16;255],
 }
 pub struct Level{
     sectors:Vec<Sector>,
@@ -18,7 +19,7 @@ pub struct Level{
 }
 
 impl Level{
-    fn load_sectors(&mut self, map_path:String) -> Result<u8,String>{
+    fn load_sectors(&mut self, map_path:String) -> Result<u16,String>{
         //let contents = fs::read_to_string(map_path);
         //for row in contents{
             //if row == "[SECTORS]"
@@ -35,6 +36,7 @@ impl Level{
             ),
             floor_heigth:300,
             ceiling_heigth:0,
+            portals:[0;255],
         };
         let sec_id = setor.number;
         self.sectors.push(setor);
@@ -52,13 +54,10 @@ impl Level{
         }
         return lvl;
     }
-        pub fn draw_map(&self,screen:&mut sdl2::render::Canvas<Window>,player:&Player) -> Result<(), u8>{ 
-        let wall_color = sdl2::pixels::Color::RGB(255,255,255);
-        screen.set_draw_color(wall_color);
-        let sector: &Sector = self.sectors.get(0).unwrap();
+    fn draw_sector(&self, player:&Player, fov:f64, sector: &Sector,screen:&mut sdl2::render::Canvas<Window>){
         for line in 0..player.fov{
             for i in 0..self.sectors.get(0).unwrap().points_vec.len(){
-                let angle = (player.alpha - PI/8.) + (PI/(4.*player.fov as f64))*line as f64;
+                let angle = (player.alpha - fov/2.) + (fov/(player.fov as f64))*line as f64;
                 let point:Vector2D<f64> = player.pos + Vector2D { x: f64::cos(angle), y: f64::sin(angle) };
                 let line_seg_start: &Vector2D<f64>;
                 if i == 0{
@@ -72,7 +71,7 @@ impl Level{
                 match distance{
                     Some(dist) => {
                         //println!("{}, {}", i, dist);
-                        match screen.fill_rect(Rect::new(line as i32,720/2 -(300./((dist+0.1))) as i32/2,1,(300./(dist+0.1)) as u32)){
+                        match screen.fill_rect(Rect::new(line as i32,720/2 - (300./((dist+0.1))) as i32/2,1,(300./(dist+0.1)) as u32)){
                             Ok(()) => { }
                             Err(str) => {println!("{}",str)}
                         }
@@ -82,7 +81,13 @@ impl Level{
                 }
             }
         }
-        screen.set_draw_color(sdl2::pixels::Color::RGB(100,100,100));
+    }
+    pub fn draw_map(&self,screen:&mut sdl2::render::Canvas<Window>,player:&Player) -> Result<(), u8>{ 
+        let wall_color = sdl2::pixels::Color::RGB(255,255,255);
+        screen.set_draw_color(wall_color);
+        let sector: &Sector = self.sectors.get(player.get_current_sector()).unwrap();
+        self.draw_sector(player, PI/4., sector, screen);
+        screen.set_draw_color(sdl2::pixels::Color::RGB(100,100,100));// clear color 
         Ok(())
     }
 }

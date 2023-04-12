@@ -6,6 +6,7 @@ pub struct Player{
     pub speed:Vector2D<f64>,
     pub alpha:f64,
     pub fov:u16,
+    current_sector:usize,
 }
 impl Player{
     pub fn new(pos: Vector2D<f64>)-> Self{
@@ -14,6 +15,7 @@ impl Player{
             speed:Vector2D { x: (0.), y: (0.) },
             alpha:0.0,
             fov:1280,
+            current_sector: 0,
         }
     }
     pub fn _check_collision(&self, cube:&Rect)->u8{
@@ -91,7 +93,10 @@ impl Player{
             _ => { return None }
         }
     }
-    //fn renderiza_setor(&self, setor:Setor)
-    //fn renderiza_mapa(&self, mapa)
-
+    pub fn get_current_sector(&self) -> usize{
+        return self.current_sector;
+    }
+    pub fn change_current_sector(&mut self, new_sector:usize) -> (){
+        self.current_sector = new_sector;
+    }
 }
