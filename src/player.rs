@@ -18,17 +18,16 @@ impl Player{
             current_sector: 0,
         }
     }
-    pub fn _check_collision(&self, cube:&Rect)->u8{
-        if (self.pos.x + self.speed.x > f64::from(cube.x) && self.pos.x + self.speed.x < f64::from(cube.x) + f64::from(cube.w) ) // checa no eixo x
-        && (self.pos.y + self.speed.y > f64::from(cube.y) && self.pos.y + self.speed.y < f64::from(cube.y) + f64::from(cube.h) ) //checa o eixo y
-        {
-            return 1; // 1 = colisao frontal
-        }
-        if (self.pos.x - self.speed.x > f64::from(cube.x) && self.pos.x - self.speed.x < f64::from(cube.x) + f64::from(cube.w) ) // checa no eixo x
-        && (self.pos.y - self.speed.y > f64::from(cube.y )&& self.pos.y - self.speed.y < f64::from(cube.y) + f64::from(cube.h) ) //checa o eixo y
-        { 
-            return 2; // 2 = colisao traseira
-        }
+    pub fn _check_collision(&self, wall_start: &Vector2D<f64>, wall_end: &Vector2D<f64>)->u8{
+        let point:Vector2D<f64> = self.pos + Vector2D { x: f64::cos(self.alpha), y: f64::sin(self.alpha) };
+        match self.calculate_distance(point,wall_start, wall_end){
+            Some(dist) => { 
+                if dist < 0.1{ //colisao
+                    //do something
+                }
+            },
+            _ => { }
+         }
         return 0;
     }
     pub fn player_controller(&mut self, event_pump: &EventPump){
@@ -45,7 +44,7 @@ impl Player{
                 (Scancode::A, true) => self.alpha -= 0.001,
                 //(Scancode::S, true) => self.pos.y += 0.1,
 
-                _ => ( )
+        _ => ( )
             }
         }
         return;
