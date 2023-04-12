@@ -17,7 +17,7 @@ fn main() -> Result<(), String>{
 
     let level_1 = Level::new("../maps/test.map".to_string(), 0, "Test".to_string());
     
-    let mut player = Player::new(vector2d::Vector2D { x: 0.5, y: 0.5 });
+    let mut player = Player::new(vector2d::Vector2D { x: 1., y: 1. });
 
     let mut canvas:Canvas<Window> = window.into_canvas()
         .build()

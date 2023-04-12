@@ -39,8 +39,8 @@ impl Player{
         for scancode in iter{
             match scancode{
                 //(Scancode::W, true) => self.pos.y -= 0.1,
-                (Scancode::D, true) => self.alpha += 0.01,
-                (Scancode::A, true) => self.alpha -= 0.01,
+                (Scancode::D, true) => self.alpha += 0.001,
+                (Scancode::A, true) => self.alpha -= 0.001,
                 //(Scancode::S, true) => self.pos.y += 0.1,
 
                 _ => ( )
@@ -60,18 +60,20 @@ impl Player{
         let x3 = line_seg_start.x; let y3 = line_seg_start.y;
         let x4 = line_seg_end.x; let y4 = line_seg_end.y;
 
-        let t:f64 = (x1-x3)*(y3-y4)-(y1-y3)*(x3-x4)/
-                    (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);
+        let t:f64 = ((x1-x3)*(y3-y4)-(y1-y3)*(x3-x4))/
+                    ((x1-x2)*(y3-y4)-(y1-y2)*(x3-x4));
 
 
-        let u:f64 = (x1-x3)*(y1-y2)-(y1-y3)*(x1-x2)/
-                    (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);
+        let u:f64 = ((x1-x3)*(y1-y2)-(y1-y3)*(x1-x2))/
+                    ((x1-x2)*(y3-y4)-(y1-y2)*(x3-x4));
 
-        let t_vec:Vector2D<f64> = Vector2D::new(t,t); // transformamos em um vetor 2d para
+        let t_vec:Vector2D<f64> = Vector2D::new(t,t);
+        let u_vec:Vector2D<f64> = Vector2D::new(u,u); // transformamos em um vetor 2d para
         // conveniência da conta (a biblioteca não tanka multiplicar normal)
 
         //por alguma magia a linha criada será igual ao ponto de intersecção?
         let line_1: Vector2D<f64> = self.pos + Vector2D::mul_components(t_vec, line_seg_player - self.pos);
+        //let line_2: Vector2D<f64> = line_seg_start + &Vector2D::mul_components(u_vec,line_seg_end - line_seg_start);
 
         if t >= 0. && t <= 1. && u >= 0. && u <= 1.{//significa que a interescção das retas se encontra dentro dos dois segmentos de reta
             return Some(line_1)
