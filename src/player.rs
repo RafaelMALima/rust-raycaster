@@ -1,4 +1,4 @@
-use sdl2::{rect::Rect, EventPump, keyboard::Scancode};
+use sdl2::{EventPump, keyboard::Scancode};
 use vector2d::Vector2D;
 
 pub struct Player{
@@ -18,12 +18,15 @@ impl Player{
             current_sector: 0,
         }
     }
-    pub fn _check_collision(&self, wall_start: &Vector2D<f64>, wall_end: &Vector2D<f64>)->u8{
+    pub fn _check_collision(&mut self, wall_start: &Vector2D<f64>, wall_end: &Vector2D<f64>, is_portal:Option<usize>)->u8{
         let point:Vector2D<f64> = self.pos + Vector2D { x: f64::cos(self.alpha), y: f64::sin(self.alpha) };
         match self.calculate_distance(point,wall_start, wall_end){
             Some(dist) => { 
-                if dist < 0.1{ //colisao
-                    //do something
+                if dist < 0.1{ 
+                    match is_portal {
+                        Some(sector) => self.change_current_sector(sector),
+                        None =>  {/*colisao*/}
+                    }
                 }
             },
             _ => { }
@@ -31,20 +34,16 @@ impl Player{
         return 0;
     }
     pub fn player_controller(&mut self, event_pump: &EventPump){
-        //match event_pump.keyboard_state().keyboardstate{
-        //      Scancode::W => println!("w pressed"),
-        //      _ => ( )
-        //}
         let binding = event_pump.keyboard_state();
         let iter = binding.scancodes();
         for scancode in iter{
             match scancode{
-                //(Scancode::W, true) => self.pos.y -= 0.1,
+                (Scancode::W, true) => {self.pos.y += 0.001*f64::sin(self.alpha); self.pos.x += 0.001*f64::cos(self.alpha)},
                 (Scancode::D, true) => self.alpha += 0.001,
                 (Scancode::A, true) => self.alpha -= 0.001,
-                //(Scancode::S, true) => self.pos.y += 0.1,
+                (Scancode::S, true) => {self.pos.y -= 0.001*f64::sin(self.alpha); self.pos.x -= 0.001*f64::cos(self.alpha)},
 
-        _ => ( )
+                _ => ( )
             }
         }
         return;
